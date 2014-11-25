@@ -88,6 +88,9 @@ module NewRelic
           return unless event.payload[:connection_id]
 
           connections = ::ActiveRecord::Base.connection_handler.connection_pool_list.map { |handler| handler.connections }.flatten
+
+          connections += (::ActiveRecord::Base.connection.instance_variable_get(:@shards) || {}).values.map(&:connections).flatten
+
           connection = connections.detect { |cnxn| cnxn.object_id == event.payload[:connection_id] }
 
           connection.instance_variable_get(:@config) if connection
